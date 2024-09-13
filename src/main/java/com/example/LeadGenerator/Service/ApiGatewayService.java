@@ -2,13 +2,22 @@ package com.example.LeadGenerator.Service;
 
 import com.example.LeadGenerator.dao.MerchantRepository;
 import com.example.LeadGenerator.entity.Merchant;
+import com.example.LeadGenerator.enums.MerchantStatus;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -20,11 +29,12 @@ import java.util.List;
 public class ApiGatewayService {
 
     private static final String API_KEY = "AIzaSyAa0Xo4BfmelC_rrTZr6XZKv-GPRiiq1T4";  // Replace with actual API key
+    private static final String PLACE_DETAILS_URL = "https://maps.googleapis.com/maps/api/place/details/json";
 
     @Autowired
     private MerchantRepository merchantRepository;
 
-    public void searchPlacesNearCoordinates(double latitude, double longitude, Long radius) {
+    public void searchPlacesNearCoordinates(double latitude, double longitude, Long radius, String source) {
         try {
             String nextPageToken = null;
             do {
@@ -58,9 +68,27 @@ public class ApiGatewayService {
                 for (int i = 0; i < results.length(); i++) {
                     JSONObject place = results.getJSONObject(i);
                     log.info("Place : {}", place);
-
+                    String placeId = place.getString("place_id");
+                    JsonNode placeDetails = null;
+                    if(!ObjectUtils.isEmpty(placeId)){
+                        placeDetails = getPlaceDetails(placeId);
+                        log.info("place details api response for place_id: {} {}", placeId, placeDetails);
+                    }
                     // Create new Merchant object
                     Merchant merchant = new Merchant();
+                    merchant.setSource(source);
+                    merchant.setStatus(MerchantStatus.PENDING);
+                    if(!ObjectUtils.isEmpty(placeDetails) && !ObjectUtils.isEmpty(placeDetails.get("result"))) {
+                        merchant.setFormatted_address(!ObjectUtils.isEmpty(placeDetails.get("result").get("formatted_address"))
+                                ? String.valueOf((placeDetails.get("result").get("formatted_address"))) : null);
+                        merchant.setContactNumber(!ObjectUtils.isEmpty(placeDetails.get("result").get("international_phone_number"))
+                                ? String.valueOf((placeDetails.get("result").get("international_phone_number"))) : null);
+                        merchant.setPlaceDetailsName(!ObjectUtils.isEmpty(placeDetails.get("result").get("name"))
+                                ? String.valueOf((placeDetails.get("result").get("name"))) : null);
+                        merchant.setPinCode(!ObjectUtils.isEmpty(placeDetails.get("result").get("formatted_address"))
+                                ? extractPincode(String.valueOf((placeDetails.get("result").get("formatted_address")))) : null);
+                    }
+
                     merchant.setShopName(place.getString("name"));
                     merchant.setPlaceId(place.getString("place_id"));
                     merchant.setBusinessStatus(place.optString("business_status", "N/A"));
@@ -99,5 +127,39 @@ public class ApiGatewayService {
         } catch (Exception e) {
             log.error("Error in searchPlacesNearCoordinates", e);
         }
+    }
+
+    public JsonNode getPlaceDetails(String placeId) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String url = PLACE_DETAILS_URL + "?place_id=" + placeId + "&key=" + API_KEY;
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            // Parse response to JsonNode
+            String responseBody = response.body().string();
+            return objectMapper.readTree(responseBody);
+        }
+    }
+    public String extractPincode(String address) {
+        // Split the address by commas
+        String[] addressParts = address.split(",");
+
+        // Check if the address has at least two parts
+        if (addressParts.length < 2) {
+            log.error("Invalid address format");
+        }
+        // The second last part should contain the pincode
+        String pincodePart = addressParts[addressParts.length - 2].trim();
+        // Return the trimmed pincode
+        return pincodePart.split(" ")[pincodePart.split(" ").length - 1]; // Extract last part, which is the pincode
     }
 }

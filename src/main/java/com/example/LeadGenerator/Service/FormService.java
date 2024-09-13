@@ -23,19 +23,20 @@ public class FormService {
     @Autowired
     private UserRepository userRepository;
 
-    public ResponseEntity<String> saveFormData(FormData formData) {
+    public ResponseEntity<String> saveFormData(FormData formData, String source) {
 
-        if (checkIfMerchantExists(formData.getLat(),formData.getLog())) {
+        if (checkIfMerchantExists(formData.getLat(),formData.getLng()) > 0) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Merchant already referred");
         }
 
         Merchant merchant = new Merchant();
         merchant.setShopName(formData.getShopName());
         merchant.setContactNumber(formData.getMerchantContact());
-        merchant.setLng(formData.getLog());
+        merchant.setLng(formData.getLng());
         merchant.setLat(formData.getLat());
         merchant.setMerchantName(formData.getMerchantName());
         merchant.setPinCode(formData.getPinCode());
+        merchant.setSource(source);
         // Save the form data
         Merchant savedMerchant = merchantRepository.save(merchant);
         User user = userRepository.findByHash(formData.getRefereeID());
@@ -51,7 +52,7 @@ public class FormService {
         }
         return ResponseEntity.status(HttpStatus.CREATED).body("Referral is successfully");
     }
-    public boolean checkIfMerchantExists(Double lat, Double lng) {
+    public Long checkIfMerchantExists(Double lat, Double lng) {
         return merchantRepository.existsByLatLong(lat, lng);
     }
 }

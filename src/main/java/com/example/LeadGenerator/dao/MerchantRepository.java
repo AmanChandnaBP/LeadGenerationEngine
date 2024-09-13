@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface MerchantRepository extends JpaRepository<Merchant, Long> {
     // Custom queries can be defined here if needed
 
-    @Query(value = "SELECT COUNT(*) > 0 FROM merchant WHERE lat = :lat AND lng = :lng", nativeQuery = true)
-    boolean existsByLatLong(@Param("lat") Double lat, @Param("lng") Double lng);
+    @Query(value = "SELECT COUNT(*)  FROM merchant WHERE lat = :lat AND lng = :lng", nativeQuery = true)
+    Long existsByLatLong(@Param("lat") Double lat, @Param("lng") Double lng);
 }

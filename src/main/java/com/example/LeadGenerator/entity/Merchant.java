@@ -1,13 +1,18 @@
 package com.example.LeadGenerator.entity;
 
+import com.example.LeadGenerator.enums.MerchantStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "merchant")
+@AllArgsConstructor
 public class Merchant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +39,10 @@ public class Merchant {
     private Double southwestLng;
     private Double northeastLat;
     private Double northeastLng;
+    private String formatted_address;
+    private String placeDetailsName;
+    private String source;
+    @Enumerated(EnumType.STRING)
+    private MerchantStatus status;
+
 }
