@@ -61,7 +61,7 @@ public class ApiGatewayService {
 
                     // Create new Merchant object
                     Merchant merchant = new Merchant();
-                    merchant.setName(place.getString("name"));
+                    merchant.setShopName(place.getString("name"));
                     merchant.setPlaceId(place.getString("place_id"));
                     merchant.setBusinessStatus(place.optString("business_status", "N/A"));
                     merchant.setIconUrl(place.optString("icon", "No icon available"));

@@ -13,7 +13,7 @@ public class Merchant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String shopName;
     private String placeId;
     private String businessStatus;
     private String iconUrl;
@@ -21,6 +21,9 @@ public class Merchant {
     private Integer userRatingsTotal;
     private Boolean permanentlyClosed;
     private String vicinity;
+    private String ContactNumber;
+    private String merchantName;
+    private String pinCode;
 
     // Add latitude and longitude fields directly
     private Double lat;
