@@ -81,7 +81,7 @@ public class ApiGatewayService {
                     if(!ObjectUtils.isEmpty(placeDetails) && !ObjectUtils.isEmpty(placeDetails.get("result"))) {
                         merchant.setFormatted_address(!ObjectUtils.isEmpty(placeDetails.get("result").get("formatted_address"))
                                 ? String.valueOf((placeDetails.get("result").get("formatted_address"))) : null);
-                        merchant.setInternational_phone_number(!ObjectUtils.isEmpty(placeDetails.get("result").get("international_phone_number"))
+                        merchant.setContactNumber(!ObjectUtils.isEmpty(placeDetails.get("result").get("international_phone_number"))
                                 ? String.valueOf((placeDetails.get("result").get("international_phone_number"))) : null);
                         merchant.setPlaceDetailsName(!ObjectUtils.isEmpty(placeDetails.get("result").get("name"))
                                 ? String.valueOf((placeDetails.get("result").get("name"))) : null);

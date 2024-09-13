@@ -40,9 +40,9 @@ public class Merchant {
     private Double northeastLat;
     private Double northeastLng;
     private String formatted_address;
-    private String international_phone_number;
     private String placeDetailsName;
     private String source;
+    @Enumerated(EnumType.STRING)
     private MerchantStatus status;
 
 }
