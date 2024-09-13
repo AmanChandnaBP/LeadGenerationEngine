@@ -23,7 +23,7 @@ public class FormService {
     @Autowired
     private UserRepository userRepository;
 
-    public ResponseEntity<String> saveFormData(FormData formData) {
+    public ResponseEntity<String> saveFormData(FormData formData, String source) {
 
         if (checkIfMerchantExists(formData.getLat(),formData.getLng()) > 0) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Merchant already referred");
@@ -36,6 +36,7 @@ public class FormService {
         merchant.setLat(formData.getLat());
         merchant.setMerchantName(formData.getMerchantName());
         merchant.setPinCode(formData.getPinCode());
+        merchant.setSource(source);
         // Save the form data
         Merchant savedMerchant = merchantRepository.save(merchant);
         User user = userRepository.findByHash(formData.getRefereeID());
