@@ -25,14 +25,14 @@ public class FormService {
 
     public ResponseEntity<String> saveFormData(FormData formData) {
 
-        if (checkIfMerchantExists(formData.getLat(),formData.getLog())) {
+        if (checkIfMerchantExists(formData.getLat(),formData.getLng()) > 0) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Merchant already referred");
         }
 
         Merchant merchant = new Merchant();
         merchant.setShopName(formData.getShopName());
         merchant.setContactNumber(formData.getMerchantContact());
-        merchant.setLng(formData.getLog());
+        merchant.setLng(formData.getLng());
         merchant.setLat(formData.getLat());
         merchant.setMerchantName(formData.getMerchantName());
         merchant.setPinCode(formData.getPinCode());
@@ -51,7 +51,7 @@ public class FormService {
         }
         return ResponseEntity.status(HttpStatus.CREATED).body("Referral is successfully");
     }
-    public boolean checkIfMerchantExists(Double lat, Double lng) {
+    public Long checkIfMerchantExists(Double lat, Double lng) {
         return merchantRepository.existsByLatLong(lat, lng);
     }
 }
