@@ -1,4 +1,4 @@
-package com.example.LeadGenerator.Service;
+package com.example.LeadGenerator.util;
 
 
 import java.io.BufferedReader;
