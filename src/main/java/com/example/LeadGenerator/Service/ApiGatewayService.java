@@ -1,20 +1,28 @@
 package com.example.LeadGenerator.Service;
 
+import com.example.LeadGenerator.dao.MerchantRepository;
+import com.example.LeadGenerator.entity.Merchant;
+import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Service
 public class ApiGatewayService {
-    private static final String API_KEY = "AIzaSyAa0Xo4BfmelC_rrTZr6XZKv-GPRiiq1T4"; // Replace with your actual Google API Key
+
+    private static final String API_KEY = "AIzaSyAa0Xo4BfmelC_rrTZr6XZKv-GPRiiq1T4";  // Replace with actual API key
+
+    @Autowired
+    private MerchantRepository merchantRepository;
 
     public void searchPlacesNearCoordinates(double latitude, double longitude, Long radius) {
         try {
@@ -45,47 +53,52 @@ public class ApiGatewayService {
                 JSONObject jsonResponse = new JSONObject(response.toString());
                 JSONArray results = jsonResponse.getJSONArray("results");
                 log.info("Results size: {}", results.length());
+                List<Merchant> merchants = new ArrayList<>();
+
                 for (int i = 0; i < results.length(); i++) {
                     JSONObject place = results.getJSONObject(i);
                     log.info("Place : {}", place);
-                    String name = place.getString("name");
-                    String placeId = place.getString("place_id");
-                    String businessStatus = place.optString("business_status", "N/A");
 
+                    // Create new Merchant object
+                    Merchant merchant = new Merchant();
+                    merchant.setName(place.getString("name"));
+                    merchant.setPlaceId(place.getString("place_id"));
+                    merchant.setBusinessStatus(place.optString("business_status", "N/A"));
+                    merchant.setIconUrl(place.optString("icon", "No icon available"));
+
+                    // Optional: Get rating and user ratings total
+                    merchant.setRating(place.optDouble("rating", 0.0));
+                    merchant.setUserRatingsTotal(place.optInt("user_ratings_total", 0));
+
+                    // Optional: Check if permanently closed
+                    merchant.setPermanentlyClosed(place.optBoolean("permanently_closed", false));
+
+                    // Set lat and lng directly in Merchant
                     JSONObject location = place.getJSONObject("geometry").getJSONObject("location");
-                    double placeLatitude = location.getDouble("lat");
-                    double placeLongitude = location.getDouble("lng");
+                    merchant.setLat(location.getDouble("lat"));
+                    merchant.setLng(location.getDouble("lng"));
 
-                    // Optional: get opening hours
-                    JSONObject openingHours = place.optJSONObject("opening_hours");
-                    boolean openNow = openingHours != null && openingHours.optBoolean("open_now", false);
+                    // Set viewport coordinates in merchant
+                    JSONObject viewport = place.getJSONObject("geometry").getJSONObject("viewport");
+                    merchant.setSouthwestLat(viewport.getJSONObject("southwest").getDouble("lat"));
+                    merchant.setSouthwestLng(viewport.getJSONObject("southwest").getDouble("lng"));
+                    merchant.setNortheastLat(viewport.getJSONObject("northeast").getDouble("lat"));
+                    merchant.setNortheastLng(viewport.getJSONObject("northeast").getDouble("lng"));
 
-                    // Optional: get photos
-                    JSONArray photos = place.optJSONArray("photos");
-                    String photoReference = (photos != null && photos.length() > 0) ? photos.getJSONObject(0).getString("photo_reference") : "No photo available";
-
-                    // Get the icon
-                    String icon = place.optString("icon", "No icon available");
-
-                    System.out.println("Place Name: " + name);
-                    System.out.println("Place ID: " + placeId);
-                    System.out.println("Business Status: " + businessStatus);
-                    System.out.println("Open Now: " + openNow);
-                    System.out.println("Photo Reference: " + photoReference);
-                    System.out.println("Icon URL: " + icon);
-                    System.out.println("Latitude: " + placeLatitude);
-                    System.out.println("Longitude: " + placeLongitude);
-                    System.out.println();
+                    merchant.setVicinity(place.optString("vicinity", "No vicinity available"));
+                    log.info("saving merchant details {}",merchant);
+                    merchantRepository.save(merchant);
                 }
+
+                // Save all merchants to the database
+
 
                 // Check for next page token for pagination
                 nextPageToken = jsonResponse.optString("next_page_token", null);
 
             } while (nextPageToken != null);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error in searchPlacesNearCoordinates", e);
         }
     }
-
 }
-
