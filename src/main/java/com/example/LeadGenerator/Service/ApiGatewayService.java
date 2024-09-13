@@ -87,13 +87,12 @@ public class ApiGatewayService {
 
                     merchant.setVicinity(place.optString("vicinity", "No vicinity available"));
                     log.info("saving merchant details {}",merchant);
-                    merchantRepository.save(merchant);
+                    try {
+                        merchantRepository.save(merchant);
+                    } catch(Exception e){
+                        log.error("Not able to save merchant details: {}", merchant);
+                    }
                 }
-
-                // Save all merchants to the database
-
-
-                // Check for next page token for pagination
                 nextPageToken = jsonResponse.optString("next_page_token", null);
 
             } while (nextPageToken != null);
