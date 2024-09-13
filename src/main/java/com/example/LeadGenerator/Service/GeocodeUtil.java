@@ -10,7 +10,7 @@ import org.json.JSONObject;
 public class GeocodeUtil {
     private static final String API_KEY = "AIzaSyAa0Xo4BfmelC_rrTZr6XZKv-GPRiiq1T4"; // Replace with your actual Google API Key
 
-    public static double[] getCoordinatesForPincode(String pincode) {
+    public static double[] getCoordinatesForPincode(Long pincode) {
         double[] coordinates = new double[2];
         try {
             String url = "https://maps.googleapis.com/maps/api/geocode/json?address=" + pincode + "&key=" + API_KEY;

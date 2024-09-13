@@ -7,11 +7,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.stereotype.Service;
 
-public class PlacesUtil {
+@Service
+public class ApiGatewayService {
     private static final String API_KEY = "AIzaSyAa0Xo4BfmelC_rrTZr6XZKv-GPRiiq1T4"; // Replace with your actual Google API Key
 
-    public static void searchPlacesNearCoordinates(double latitude, double longitude) {
+    public void searchPlacesNearCoordinates(double latitude, double longitude) {
         try {
             String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location="
                     + latitude + "," + longitude
@@ -64,16 +66,6 @@ public class PlacesUtil {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public static void main(String[] args) {
-        String pincode = "122002"; // Example pincode
-        double[] coordinates = GeocodeUtil.getCoordinatesForPincode(pincode);
-        if (coordinates[0] != 0 && coordinates[1] != 0) {
-            searchPlacesNearCoordinates(coordinates[0], coordinates[1]);
-        } else {
-            System.out.println("Failed to retrieve coordinates.");
         }
     }
 }
