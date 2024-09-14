@@ -16,10 +16,17 @@ public class MerchantService {
 
 
     public boolean onBoardMerchant(String placeId){
-        Merchant merchant=merchantRepository.findByPlaceId(placeId);
-        merchant.setStatus(MerchantStatus.ONBOARDED);
-        merchantRepository.save(merchant);
-        return true;
+        log.info("place id: {}", placeId);
+        try {
+            Merchant merchant=merchantRepository.findByPlaceId(placeId);
+            log.info("merchant fetched using place id: {}", merchant);
+            merchant.setStatus(MerchantStatus.ONBOARDED);
+            log.info(String.valueOf(merchant));
+            merchantRepository.save(merchant);
+            return true;
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

@@ -60,12 +60,10 @@ public class LeadGenerationController {
         return merchantService.onBoardMerchant(placeId);
     }
 
-    @PostMapping("/refrralLink")
+    @PostMapping("/consumer/referal/Link")
     public ResponseEntity<String> getReffralLink(@RequestBody RefereeLinkData refreeLinkData) {
         return formService.getUserReferLink(refreeLinkData.getRefereePhone());
     }
-
-
 
     @GetMapping("/test1")
     public ResponseEntity<?> test1(){
