@@ -24,7 +24,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/leadGenerator/*").permitAll() // Allow access to the registration endpoint
+                        .requestMatchers("/leadGenerator/**").permitAll() // Allow access to the registration endpoint
                         .anyRequest().authenticated() // All other requests require authentication
                 )
                 .formLogin(form -> form
