@@ -17,7 +17,7 @@ public class EnrichmentConfig {
     public static final String PREFIX = "enrichment";
     private Integer NotPermanentlyClosedRuleScore = 100;
     private Integer BusinessStatusOperationalRuleScore = 90;
-    private Integer RatingThreshold = 4.0;
+    private Integer RatingThreshold = 4;
     private Integer RatingAboveThresholdScore = 80;
     private Integer IconUriNotEmptyRuleScore = 70;
     private Integer ShopNameNotEmptyRuleScore = 60;

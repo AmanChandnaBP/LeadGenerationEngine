@@ -2,19 +2,22 @@ package com.example.LeadGenerator.Service.enrichment;
 
 import com.example.LeadGenerator.Service.enrichment.ruleImpl.*;
 import com.example.LeadGenerator.config.EnrichmentConfig;
+import com.example.LeadGenerator.dao.ExistingMerchantsRepository;
+import com.example.LeadGenerator.dao.MerchantRepository;
 import com.example.LeadGenerator.dao.PotentialLeadRepository;
 import com.example.LeadGenerator.entity.Merchant;
 import com.example.LeadGenerator.entity.PotentialLead;
+import com.example.LeadGenerator.enums.MerchantStatus;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+@Service
 public class EnrichmentService {
 
     List<Rule> mapsRuleList;
@@ -27,23 +30,36 @@ public class EnrichmentService {
     @Autowired
     EnrichmentConfig enrichmentConfig;
 
-    EnrichmentService() {
-        mapsRuleList = new ArrayList<>();
-        mapsRuleList.add(new NotPermanentlyClosedRule(enrichmentConfig.getNotPermanentlyClosedRuleScore()));
-        mapsRuleList.add(new BusinessStatusOperationalRule(enrichmentConfig.getBusinessStatusOperationalRuleScore()));
-        mapsRuleList.add(new RatingAboveThresholdRule(enrichmentConfig.getRatingThreshold(), enrichmentConfig.getRatingAboveThresholdScore()));
-        mapsRuleList.add(new IconUrlNotEmptyRule(enrichmentConfig.getIconUriNotEmptyRuleScore()));
-        mapsRuleList.add(new ShopNameNotEmptyRule(enrichmentConfig.getShopNameNotEmptyRuleScore()));
-        mapsRuleList.add(new ValidContactNumberRule(enrichmentConfig.getValidContactNumberRuleScore()));
-        mapsRuleList.add(new ValidLatitudeLongitudeRule(enrichmentConfig.getValidLatitudeLongitudeRuleScore()));
-        mapsRuleList.add(new ValidPinCodeRule(enrichmentConfig.getValidPinCodeRuleScore()));
+    @Autowired
+    MerchantRepository merchantRepository;
 
-        referralRuleList = new ArrayList<>();
-        referralRuleList.add(new MerchantNameNotEmptyRule(enrichmentConfig.getMerchantNameNotEmptyRuleScore()));
-        referralRuleList.add(new ShopNameNotEmptyRule(enrichmentConfig.getShopNameNotEmptyRuleScore()));
-        referralRuleList.add(new ValidContactNumberRule(enrichmentConfig.getValidContactNumberRuleScore()));
-        referralRuleList.add(new ValidLatitudeLongitudeRule(enrichmentConfig.getValidLatitudeLongitudeRuleScore()));
-        referralRuleList.add(new ValidPinCodeRule(enrichmentConfig.getValidPinCodeRuleScore()));
+    @Autowired
+    ExistingMerchantsRepository existingMerchantsRepository;
+
+    @Autowired
+    public EnrichmentService(PotentialLeadRepository potentialLeadRepository,
+                             EnrichmentConfig enrichmentConfig,
+                             ExistingMerchantsRepository existingMerchantsRepository) {
+
+        this.potentialLeadRepository = potentialLeadRepository;
+        this.enrichmentConfig = enrichmentConfig;
+        this.existingMerchantsRepository = existingMerchantsRepository;
+
+        this.mapsRuleList = new ArrayList<>();
+        this.referralRuleList = new ArrayList<>();
+
+        // Add rules for maps leads
+        this.mapsRuleList.add(new NotPermanentlyClosedRule(enrichmentConfig.getNotPermanentlyClosedRuleScore()));
+        this.mapsRuleList.add(new BusinessStatusOperationalRule(enrichmentConfig.getBusinessStatusOperationalRuleScore()));
+        this.mapsRuleList.add(new RatingAboveThresholdRule(enrichmentConfig.getRatingThreshold(), enrichmentConfig.getRatingAboveThresholdScore()));
+        this.mapsRuleList.add(new IconUrlNotEmptyRule(enrichmentConfig.getIconUriNotEmptyRuleScore()));
+        this.mapsRuleList.add(new ShopNameNotEmptyRule(enrichmentConfig.getShopNameNotEmptyRuleScore()));
+        this.mapsRuleList.add(new ValidContactNumberRule(enrichmentConfig.getValidContactNumberRuleScore()));
+        this.mapsRuleList.add(new ValidLatitudeLongitudeRule(enrichmentConfig.getValidLatitudeLongitudeRuleScore()));
+        this.mapsRuleList.add(new ValidPinCodeRule(enrichmentConfig.getValidPinCodeRuleScore()));
+
+        // Add CheckIfExistingMerchantRule
+        this.mapsRuleList.add(new CheckIfExistingMerchantRule(existingMerchantsRepository));
     }
 
     public List<PotentialLead> evaluateRawDataAndMerge(List<Merchant> rawData) {
@@ -57,6 +73,7 @@ public class EnrichmentService {
             }
         }
         potentialLeadRepository.saveAll(potentialLeads);
+        merchantRepository.saveAll(rawData);
         List<PotentialLead> existingLeads = potentialLeadRepository.findAllByPinCodeIn(pinCodes);
         potentialLeads.addAll(existingLeads);
         return potentialLeads;
@@ -82,6 +99,7 @@ public class EnrichmentService {
             }
         }
         merchant.setFailedRules(failedRules.toString());
+        merchant.setStatus(finalResult ? MerchantStatus.PENDING : MerchantStatus.REJECTED);
         return RuleResult.builder().success(finalResult).score(finalScore).build();
     }
 

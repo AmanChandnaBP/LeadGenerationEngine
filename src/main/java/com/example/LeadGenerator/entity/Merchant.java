@@ -30,7 +30,6 @@ public class Merchant {
     private String merchantName;
     private String pinCode;
     private String failedRules;
-    private String status;
 
     // Add latitude and longitude fields directly
     private Double lat;

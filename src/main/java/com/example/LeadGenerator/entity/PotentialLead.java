@@ -36,7 +36,7 @@ public class PotentialLead {
                 .contactNumber(merchant.getContactNumber())
                 .lat(merchant.getLat())
                 .lng(merchant.getLng())
-                .pincode(merchant.getPinCode())
+                .pinCode(merchant.getPinCode())
                 .userRating(merchant.getRating())
                 .score(score)
                 .build();
