@@ -14,7 +14,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -118,6 +117,7 @@ public class ApiGatewayService {
                     log.info("saving merchant details {}",merchant);
                     try {
                         merchantRepository.save(merchant);
+                        merchantList.add(merchant);
                     } catch(Exception e){
                         log.error("Not able to save merchant details: {}", merchant);
                     }
