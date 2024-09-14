@@ -114,15 +114,19 @@ public class ApiGatewayService {
                     merchant.setNortheastLng(viewport.getJSONObject("northeast").getDouble("lng"));
 
                     merchant.setVicinity(place.optString("vicinity", "No vicinity available"));
+                    merchantList.add(merchant);
+
+                    if (merchantList.size()==8)
+                        return merchantList;
+
                     log.info("saving merchant details {}",merchant);
                     try {
                         merchantRepository.save(merchant);
-                        merchantList.add(merchant);
                     } catch(Exception e){
                         log.error("Not able to save merchant details: {}", merchant);
                     }
                 }
-                nextPageToken = jsonResponse.optString("next_page_token", null);
+            //    nextPageToken = jsonResponse.optString("next_page_token", null);
 
             } while (nextPageToken != null);
         } catch (Exception e) {
