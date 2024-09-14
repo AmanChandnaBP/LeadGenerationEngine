@@ -7,6 +7,7 @@ import com.example.LeadGenerator.dao.UserRepository;
 import com.example.LeadGenerator.entity.Merchant;
 import com.example.LeadGenerator.entity.User;
 import com.example.LeadGenerator.request.FormData;
+import com.example.LeadGenerator.request.RefereeLinkData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -58,6 +59,13 @@ public class LeadGenerationController {
         log.info(placeId);
         return merchantService.onBoardMerchant(placeId);
     }
+
+    @PostMapping("/refrralLink")
+    public ResponseEntity<String> getReffralLink(@RequestBody RefereeLinkData refreeLinkData) {
+        return formService.getUserReferLink(refreeLinkData.getRefereePhone());
+    }
+
+
 
     @GetMapping("/test1")
     public ResponseEntity<?> test1(){

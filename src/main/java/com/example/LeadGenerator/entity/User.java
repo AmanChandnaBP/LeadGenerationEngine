@@ -36,6 +36,9 @@ public class User {
     @Column(name = "hash", nullable = false)
     private String hash;
 
+    @Column(name = "refferal_link", nullable = true)
+    private String refferallink;
+
     @Column(name = "count_of_referred")
     private Integer countOfReferred;
 
