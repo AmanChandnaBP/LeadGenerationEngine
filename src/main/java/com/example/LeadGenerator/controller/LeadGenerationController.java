@@ -3,6 +3,7 @@ package com.example.LeadGenerator.controller;
 import com.example.LeadGenerator.Service.FormService;
 import com.example.LeadGenerator.Service.MapService;
 import com.example.LeadGenerator.dao.UserRepository;
+import com.example.LeadGenerator.entity.Merchant;
 import com.example.LeadGenerator.entity.User;
 import com.example.LeadGenerator.request.FormData;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -29,12 +32,12 @@ public class LeadGenerationController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @GetMapping("/getLeads")
-    public void getPincodeBasedLeads(@RequestParam(name = "latitude") String latitude,
-                                     @RequestParam(name = "longitude") String longitude,
-                                     @RequestParam(name = "radius") Long radius,
-                                     @RequestParam(name = "source") String source){
+    public List<Merchant> getPincodeBasedLeads(@RequestParam(name = "latitude") String latitude,
+                                               @RequestParam(name = "longitude") String longitude,
+                                               @RequestParam(name = "radius") Long radius,
+                                               @RequestParam(name = "source") String source){
         log.info("Latitude: {}, Longitude: {}, radius: {}, source: {}", latitude, longitude, radius, source);
-        mapService.scrapDataViaLatLong(Double.parseDouble(latitude), Double.parseDouble(longitude),
+       return mapService.scrapDataViaLatLong(Double.parseDouble(latitude), Double.parseDouble(longitude),
                 radius, source);
     }
 

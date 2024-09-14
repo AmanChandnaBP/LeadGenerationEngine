@@ -34,7 +34,8 @@ public class ApiGatewayService {
     @Autowired
     private MerchantRepository merchantRepository;
 
-    public void searchPlacesNearCoordinates(double latitude, double longitude, Long radius, String source) {
+    public List<Merchant> searchPlacesNearCoordinates(double latitude, double longitude, Long radius, String source) {
+        List<Merchant> merchantList=new ArrayList<>();
         try {
             String nextPageToken = null;
             do {
@@ -127,6 +128,7 @@ public class ApiGatewayService {
         } catch (Exception e) {
             log.error("Error in searchPlacesNearCoordinates", e);
         }
+        return merchantList;
     }
 
     public JsonNode getPlaceDetails(String placeId) throws IOException {
